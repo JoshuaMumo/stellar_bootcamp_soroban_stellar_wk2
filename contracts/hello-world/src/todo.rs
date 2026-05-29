@@ -92,30 +92,17 @@ impl TodoList {
 
     pub fn delete_todo(env: &Env, id: u32) -> bool {
 
-        let todos = Self::get_todos(&env);
-        // initialize a new vector called updated 
-        let mut updated: Vec<Todo> = Vec::new(&env);
-        // if an id is not found return false
-        let mut found = false;
-
-        // initialize a for loop to iterate the id's to find the matching id
+        let mut todos = Self::get_todos(&env);
         for i in 0..todos.len() {
-            // if the id is found return true
-            if let Some(todo) = todos.get(i) {
-                if todo.id == id {
-                    found = true; 
-                } else {
-                    // all the other items are pushed to the new vector called updated
-                    updated.push_back(todo);
-                }
+            let todo = todos.get(i).unwrap();
+
+            if todo.id == id {
+                todos.remove(i);
+                env.storage().temporary().set(&TODOS, &todos);
+                return true;
             }
         }
-        // if the id is foung it is then pushed to the new vector called updated
-        if found {
-            env.storage().temporary().set(&TODOS, &updated);
-        }
-
-        found
+        false
     }
 }
 
